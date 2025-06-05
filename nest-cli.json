@@ -1,0 +1,111 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/users/src",
+  "monorepo": true,
+  "root": "apps/users",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/users/tsconfig.app.json"
+  },
+  "projects": {
+    "database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
+      }
+    },
+    "auth": {
+      "type": "library",
+      "root": "libs/auth",
+      "entryFile": "index",
+      "sourceRoot": "libs/auth/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/auth/tsconfig.lib.json"
+      }
+    },
+    "notifications": {
+      "type": "library",
+      "root": "libs/notifications",
+      "entryFile": "index",
+      "sourceRoot": "libs/notifications/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/notifications/tsconfig.lib.json"
+      }
+    },
+    "open-ai": {
+      "type": "library",
+      "root": "libs/open-ai",
+      "entryFile": "index",
+      "sourceRoot": "libs/open-ai/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/open-ai/tsconfig.lib.json"
+      }
+    },
+    "whatsapp": {
+      "type": "library",
+      "root": "libs/whatsapp",
+      "entryFile": "index",
+      "sourceRoot": "libs/whatsapp/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/whatsapp/tsconfig.lib.json"
+      }
+    },
+    "vapi": {
+      "type": "library",
+      "root": "libs/vapi",
+      "entryFile": "index",
+      "sourceRoot": "libs/vapi/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/vapi/tsconfig.lib.json"
+      }
+    },
+    "twilio": {
+      "type": "library",
+      "root": "libs/twilio",
+      "entryFile": "index",
+      "sourceRoot": "libs/twilio/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/twilio/tsconfig.lib.json"
+      }
+    },
+    "google": {
+      "type": "library",
+      "root": "libs/google",
+      "entryFile": "index",
+      "sourceRoot": "libs/google/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/google/tsconfig.lib.json"
+      }
+    },
+    "dialog-miner": {
+      "type": "library",
+      "root": "libs/dialog-miner",
+      "entryFile": "index",
+      "sourceRoot": "libs/dialog-miner/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/dialog-miner/tsconfig.lib.json"
+      }
+    },
+    "vapi-consumptions-sync": {
+      "type": "application",
+      "root": "apps/vapi-consumptions-sync",
+      "entryFile": "main",
+      "sourceRoot": "apps/vapi-consumptions-sync/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/vapi-consumptions-sync/tsconfig.app.json"
+      }
+    },
+    "cognito-messages": {
+      "type": "application",
+      "root": "apps/cognito-messages",
+      "entryFile": "main",
+      "sourceRoot": "apps/cognito-messages/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cognito-messages/tsconfig.app.json"
+      }
+    }
+  }
+}

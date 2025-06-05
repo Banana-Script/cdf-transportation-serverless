@@ -1,0 +1,44 @@
+service: viernes-business-services
+frameworkVersion: "3"
+useDotenv: true
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-plugin-typescript
+  - serverless-tscpaths
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    useChildProcesses: true
+provider:
+  name: aws
+  stage: ${opt:stage,'local'} # default to 'local'
+  versionFunctions: false
+  region: us-east-1
+  runtime: nodejs18.x
+  # Environment Variables
+  environment:
+    DB_DIALECT: "mysql"
+    DB_NAME: ${env:DB_NAME}
+    DB_USERNAME: ${env:DB_USERNAME}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT}
+    COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
+    COGNITO_CLIENT_ID: ${env:COGNITO_CLIENT_ID}
+    COGNITO_POOL_NAME: ${env:COGNITO_POOL_NAME}
+    REGION: ${env:REGION}
+    BUCKET_NAME: ${env:BUCKET_NAME}
+    # APP_DOMAIN: ${env:APP_DOMAIN}
+    BOT_DOMAIN: ${env:BOT_DOMAIN}
+    ACCESS_KEY_ID: ${env:ACCESS_KEY_ID}
+    SECRET_ACCESS_KEY: ${env:SECRET_ACCESS_KEY}
+    AWS_LAMBDA_CONVERSATIONS_TIMERS_FUNCTION_ARN: ${env:AWS_LAMBDA_CONVERSATIONS_TIMERS_FUNCTION_ARN}
+    AWS_LAMBDA_UNLOCK_CONVERSATIONS_FUNCTION_ARN: ${env:AWS_LAMBDA_UNLOCK_CONVERSATIONS_FUNCTION_ARN}
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    SERPAPI_API_KEY: ${env:SERPAPI_API_KEY}
+    GPT_MODEL: ${env:GPT_MODEL}
+    CRAWLEE_STORAGE_DIR: ${env:CRAWLEE_STORAGE_DIR}
+    ENV: ${env:PARAMS_ENV}
+functions:

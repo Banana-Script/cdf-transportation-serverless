@@ -1,0 +1,78 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es6",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": false,
+    "skipLibCheck": false,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "paths": {
+      "@app/database": [
+        "libs/database/src"
+      ],
+      "@app/database/*": [
+        "libs/database/src/*"
+      ],
+      "@auth/auth": [
+        "libs/auth/src"
+      ],
+      "@auth/auth/*": [
+        "libs/auth/src/*"
+      ],
+      "@notifications/notifications": [
+        "libs/notifications/src"
+      ],
+      "@notifications/notifications/*": [
+        "libs/notifications/src/*"
+      ],
+      "OpenAI/open-ai": [
+        "libs/open-ai/src"
+      ],
+      "OpenAI/open-ai/*": [
+        "libs/open-ai/src/*"
+      ],
+      "@app/whatsapp": [
+        "libs/whatsapp/src"
+      ],
+      "@app/whatsapp/*": [
+        "libs/whatsapp/src/*"
+      ],
+      "vapi/vapi": [
+        "libs/vapi/src"
+      ],
+      "vapi/vapi/*": [
+        "libs/vapi/src/*"
+      ],
+      "@app/twilio": [
+        "libs/twilio/src"
+      ],
+      "@app/twilio/*": [
+        "libs/twilio/src/*"
+      ],
+      "@app/google": [
+        "libs/google/src"
+      ],
+      "@app/google/*": [
+        "libs/google/src/*"
+      ],
+      "miner/dialog-miner": [
+        "libs/dialog-miner/src"
+      ],
+      "miner/dialog-miner/*": [
+        "libs/dialog-miner/src/*"
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+import { User } from '@app/database/entities';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TypeOrmCrudService } from '@dataui/crud-typeorm';
+
+@Injectable()
+export class UsersService extends TypeOrmCrudService<User> {
+  constructor(@InjectRepository(User) repo) {
+    super(repo);
+  }
+}

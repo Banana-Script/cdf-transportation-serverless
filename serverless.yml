@@ -1,0 +1,104 @@
+service: cdf-call-serverless
+frameworkVersion: "3"
+useDotenv: true
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-plugin-lambda-insights
+  - serverless-offline-ssm
+  - serverless-offline
+
+custom:
+  lambdaInsights:
+    defaultLambdaInsights: true #enables Lambda Insights for all functions
+  memorySize: 512
+  serverless-offline-ssm:
+    stages:
+      - local
+    #MODIFY FOR LOCAL DATABASE WORK
+    ssm:
+      "/dev/files-bucket": ${env:FILES_BUCKET, '905418181463-files'}
+      "/dev/cognito-app-client": ${env:COGNITO_CLIENT_ID, '40iq1o007sbbkvl8mk4n1jd431'}
+      "/dev/cognito-pool-name": ${env:COGNITO_POOL_NAME, 'cdf-call-user-pool'}
+      "/dev/user-pool": ${env:COGNITO_USER_POOL_ID, 'us-east-1_7FE8PzxQu'}
+      "/dev/app-domain": ${env:APP_DOMAIN, 'app.dev.bananascript.io'}
+      "/dev/db-host": ${env:DB_HOST, 'localhost'}
+      "/dev/db-name": ${env:DB_NAME, 'banana'}
+      "/dev/db-password": ${env:DB_PASSWORD, 'zwW:yT-69GIsyN7(vM)D#a+1nuoP'}
+      "/dev/db-port": ${env:DB_PORT, '3306'}
+      "/dev/db-user": ${env:DB_USERNAME, 'bananadmin'}
+      "/dev/lambda-deploy": "905418181463-lambda-deploy"
+      "/dev/lambda-role": "arn:aws:iam::905418181463:role/cdf-call-lambda"
+      "/dev/lambda-sg": "sg-05649da10bf6315c8"
+      "/dev/private-subnet-1": "subnet-04d567791e74b8fab"
+      "/dev/private-subnet-2": "subnet-037b5a47050477793"
+      "/dev/region": ${env:REGION, 'us-east-1'}
+      "/dev/params-env": ${env:PARAMS_ENV, 'undefined'}
+  serverless-offline:
+    useChildProcesses: true
+  secrets:
+    db_name: ${ssm:/${env:PARAMS_ENV}/db-name}
+    db_user: ${ssm:/${env:PARAMS_ENV}/db-user}
+    db_password: ${ssm:/${env:PARAMS_ENV}/db-password}
+    db_host: ${ssm:/${env:PARAMS_ENV}/db-host}
+    db_port: 3306
+    region: ${ssm:/${env:PARAMS_ENV}/region}
+    cognito_user_pool_id: ${ssm:/${env:PARAMS_ENV}/user-pool}
+    cognito_client_id: ${ssm:/${env:PARAMS_ENV}/cognito-app-client}
+    cognito_user_pool_name: ${ssm:/${env:PARAMS_ENV}/cognito-pool-name}
+    files_bucket: ${ssm:/${env:PARAMS_ENV}/files-bucket}
+    app_domain: ${ssm:/${env:PARAMS_ENV}/app-domain}
+    env: ${ssm:/${env:PARAMS_ENV}/params-env}
+
+provider:
+  name: aws
+  stage: ${opt:stage,'local'} # default to 'local'
+  timeout: 30 # optional, in seconds, default is 6
+  versionFunctions: false
+  region: us-east-1
+  # apiGateway:
+  #   restApiId: ${ssm:/${env:PARAMS_ENV}/api-gateway-id}
+  #   restApiRootResourceId: ${ssm:/${env:PARAMS_ENV}/api-gateway-root-id}
+  runtime: nodejs18.x
+  deploymentBucket:
+    name: ${ssm:/${env:PARAMS_ENV}/lambda-deploy}
+  iam:
+    role: ${ssm:/${env:PARAMS_ENV}/lambda-role}
+  vpc:
+    securityGroupIds:
+      - ${ssm:/${env:PARAMS_ENV}/lambda-sg}
+    subnetIds:
+      - ${ssm:/${env:PARAMS_ENV}/private-subnet-1}
+      - ${ssm:/${env:PARAMS_ENV}/private-subnet-2}
+  environment:
+    DB_DIALECT: "mysql"
+    DB_NAME: ${self:custom.secrets.db_name}
+    DB_USERNAME: ${self:custom.secrets.db_user}
+    DB_PASSWORD: ${self:custom.secrets.db_password}
+    DB_HOST: ${self:custom.secrets.db_host}
+    DB_PORT: ${self:custom.secrets.db_port}
+    REGION: ${self:custom.secrets.region}
+    COGNITO_USER_POOL_ID: ${self:custom.secrets.cognito_user_pool_id}
+    COGNITO_CLIENT_ID: ${self:custom.secrets.cognito_client_id}
+    COGNITO_POOL_NAME: ${self:custom.secrets.cognito_user_pool_name}
+    FILES_BUCKET: ${self:custom.secrets.files_bucket}
+    APP_DOMAIN: ${self:custom.secrets.app_domain}
+    ENV: ${self:custom.secrets.env}
+package:
+  individually: true
+  patterns:
+    - "!./**"
+functions:
+  #nest build vapi-consumptions-sync && serverless invoke local -f vapi-consumptions-sync -p ./apps/vapi-consumptions-sync/event.json
+  vapi-consumptions-sync:
+    handler: dist/apps/vapi-consumptions-sync/main.handler
+    package:
+      patterns:
+        - dist/apps/vapi-consumptions-sync/**
+
+  #nest build cognito-messages && serverless invoke local -f cognito-messages -p ./apps/cognito-messages/event.json
+  cognito-messages:
+    handler: dist/apps/cognito-messages/main.handler
+    package:
+      patterns:
+        - dist/apps/cognito-messages/**

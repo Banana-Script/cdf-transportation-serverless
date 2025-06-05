@@ -1,0 +1,20 @@
+# For more information: https://laravel.com/docs/sail
+version: '3'
+services:
+  mysql:
+    image: "mysql:8.0.30"
+    ports:
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    command: ["--max_connections=170","--interactive_timeout=180","--wait_timeout=180"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

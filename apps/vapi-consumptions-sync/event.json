@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+      "messageId": "a1844e5d-2cbe-4ae7-8d3a-1cb605b5f9a3",
+      "receiptHandle": "AQEBBGMDEmHuToF1KGzHFd7Kf3GRwvbLaaHG7ovHR/v+oKWVvAxku7pK7T8tAiIweg8NEG7Kwcrdy3J1AE89ogTkl4sB3VWzb70o51QOEKbhhhuqrk0WgSbJs3maqMJf6FRF2L6j5npIa4nTTCaF/8aOblZMvyNwaPk4YrtKOvFOKw1kb40dDXWSc8qyVneiLIH32Nnw1JSl3BuouEf0r6Ozo9/N1oD0j3iQBmK84zH7a4l3bt66fsV8EekqN4XY3t6IV3aGtWTBKDeRgQHzkFtETja30RuXZjFyWe8Pr8UAezwfdR9LhDDLTuQMxAibavZAoozSQQTOm/8MRa6jK8UlS0/Y6FMRTydd7K13zhQC04w1JCa3MHdYVTqRgoWt7tzr",
+      "body": "Sync consumptions 2025-04-16T10:30:00.000Z.",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1716942158703",
+        "SenderId": "AIDA5FTZBBNL3GZAPHBA7",
+        "ApproximateFirstReceiveTimestamp": "1716942158713"
+      },
+      "messageAttributes": {
+      },
+      "md5OfMessageAttributes": "5c1e974a075aa0525ea38834c95447be",
+      "md5OfBody": "73e6fcaf505e14d489b246c24a70cc1e",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:905418181463:VapiConsumptionsQueue",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}
