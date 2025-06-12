@@ -17,21 +17,21 @@ custom:
       - local
     #MODIFY FOR LOCAL DATABASE WORK
     ssm:
-      "/dev/files-bucket": ${env:FILES_BUCKET, '905418181463-files'}
-      "/dev/cognito-app-client": ${env:COGNITO_CLIENT_ID, '40iq1o007sbbkvl8mk4n1jd431'}
-      "/dev/cognito-pool-name": ${env:COGNITO_POOL_NAME, 'cdf-call-user-pool'}
-      "/dev/user-pool": ${env:COGNITO_USER_POOL_ID, 'us-east-1_7FE8PzxQu'}
+      "/dev/files-bucket": ${env:FILES_BUCKET, '594222377595-files'}
+      "/dev/cognito-app-client": ${env:COGNITO_CLIENT_ID, '6jfq09ogf9elhip91fe5v23fgc'}
+      "/dev/cognito-pool-name": ${env:COGNITO_POOL_NAME, 'capillasia-user-pool'}
+      "/dev/user-pool": ${env:COGNITO_USER_POOL_ID, 'us-east-1_tgJtPRCtD'}
       "/dev/app-domain": ${env:APP_DOMAIN, 'app.dev.bananascript.io'}
       "/dev/db-host": ${env:DB_HOST, 'localhost'}
-      "/dev/db-name": ${env:DB_NAME, 'banana'}
-      "/dev/db-password": ${env:DB_PASSWORD, 'zwW:yT-69GIsyN7(vM)D#a+1nuoP'}
+      "/dev/db-name": ${env:DB_NAME, 'capillasia'}
+      "/dev/db-password": ${env:DB_PASSWORD, 'm3ZS4gLiJnTrl614'}
       "/dev/db-port": ${env:DB_PORT, '3306'}
-      "/dev/db-user": ${env:DB_USERNAME, 'bananadmin'}
-      "/dev/lambda-deploy": "905418181463-lambda-deploy"
-      "/dev/lambda-role": "arn:aws:iam::905418181463:role/cdf-call-lambda"
-      "/dev/lambda-sg": "sg-05649da10bf6315c8"
-      "/dev/private-subnet-1": "subnet-04d567791e74b8fab"
-      "/dev/private-subnet-2": "subnet-037b5a47050477793"
+      "/dev/db-user": ${env:DB_USERNAME, 'admincapillasia'}
+      "/dev/lambda-deploy": "594222377595-lambda-deploy"
+      "/dev/lambda-role": "arn:aws:iam::594222377595:role/capillasia-lambda"
+      "/dev/lambda-sg": "sg-00e125d570085b639"
+      "/dev/private-subnet-1": "subnet-04795f5c82593b4e5"
+      "/dev/private-subnet-2": "subnet-09bdf2ec74d73d844"
       "/dev/region": ${env:REGION, 'us-east-1'}
       "/dev/params-env": ${env:PARAMS_ENV, 'undefined'}
   serverless-offline:
