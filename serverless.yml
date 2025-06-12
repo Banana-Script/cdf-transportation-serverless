@@ -21,7 +21,7 @@ custom:
       "/dev/cognito-app-client": ${env:COGNITO_CLIENT_ID, '6jfq09ogf9elhip91fe5v23fgc'}
       "/dev/cognito-pool-name": ${env:COGNITO_POOL_NAME, 'capillasia-user-pool'}
       "/dev/user-pool": ${env:COGNITO_USER_POOL_ID, 'us-east-1_tgJtPRCtD'}
-      "/dev/app-domain": ${env:APP_DOMAIN, 'app.dev.bananascript.io'}
+      "/dev/app-domain": ${env:APP_DOMAIN, 'https://dev-voiceaudit.capillasdelafe.com'}
       "/dev/db-host": ${env:DB_HOST, 'localhost'}
       "/dev/db-name": ${env:DB_NAME, 'capillasia'}
       "/dev/db-password": ${env:DB_PASSWORD, 'm3ZS4gLiJnTrl614'}

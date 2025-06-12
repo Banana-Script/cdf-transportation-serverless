@@ -9,7 +9,7 @@ export class CognitoMessagesService {
     const { triggerSource, request } = event;
     const userAttributes = request.userAttributes;
     const givenName = userAttributes.name || "";
-    const appUrl = process.env.APP_URL || "https://app-dev-cdf-call.bananascript.io/";
+    const appUrl = process.env.APP_URL || "https://dev-voiceaudit.capillasdelafe.com/";
     // Eliminar la barra final si existe para construir URLs consistentemente
     const baseUrl = appUrl.endsWith("/") ? appUrl.slice(0, -1) : appUrl;
 
