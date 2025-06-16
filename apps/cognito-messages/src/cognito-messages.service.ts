@@ -9,7 +9,8 @@ export class CognitoMessagesService {
     const { triggerSource, request } = event;
     const userAttributes = request.userAttributes;
     const givenName = userAttributes.name || "";
-    const appUrl = process.env.APP_URL || "https://dev-voiceaudit.capillasdelafe.com/";
+    const appUrl =
+      process.env.APP_URL || "https://dev-voiceaudit.capillasdelafe.com/";
     // Eliminar la barra final si existe para construir URLs consistentemente
     const baseUrl = appUrl.endsWith("/") ? appUrl.slice(0, -1) : appUrl;
 
@@ -37,12 +38,12 @@ export class CognitoMessagesService {
         <table width="800" border="0" cellspacing="0" cellpadding="0" style="background-color:#ffffff;">
           <!-- Banner Section -->
           <tr>
-            <td style="background-color:#141518;" align="center" valign="middle" height="200">
+            <td style="background-color:#032159;" align="center" valign="middle" height="200">
               <table width="100%" height="200" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center" valign="middle">
                     <img src="${baseUrl}/assets/images/auth/LogoWhite.png"
-                         alt="cdf-call.com | Especialistas en trámites migratorios | Consulta Gratis"
+                         alt="cdf-call.com | Con usted en los momentos difíciles"
                          width="350" height="73"
                          style="display:block; margin:0 auto; border:none; outline:none; text-decoration:none;" />
                   </td>
@@ -53,27 +54,30 @@ export class CognitoMessagesService {
           <!-- Content Section -->
           <tr>
             <td style="padding:96px 136px 0 136px; text-align:left;">
-              <h1 style="font-size:32px; font-weight:bold; color:#032159; margin:0 0 20px 0;">${emailSubject}</h1>
-              <h2 style="font-size:24px; font-weight:bold; color:#000000; margin:0 0 10px 0;">Hola, ${givenName}</h2>
-              <p style="font-size:16px; line-height:1.4; color:#434343; margin:0 0 20px 0;">
-                Tu código de verificación es ${codePlaceholder}
+              <h1 style="font-size:32px; font-weight:700; color:#000000; margin:0 0 50px 0;">${emailSubject}</h1>
+              <h2 style="font-size:24px; font-weight:700; color:#000000; margin:0 0 15px 0;">Hola, ${givenName}</h2>
+              <p style="font-size:16px; font-weight:400; color:#434343; margin:0 0 15px 0;">
+                Este es tu código para restablecer la contraseña de tu cuenta de COORSERPARK.
+              </p>
+              <p style="font-size:32px; font-weight:700; line-height:1.4; color:#E55B26; margin:0 0 20px 0;">
+                ${codePlaceholder}
               </p>
               <p style="font-size:32px; line-height:1.4; color:#e35825; margin:20px 0; font-weight:bold;">
                 
               </p>
-              <p style="font-size:16px; line-height:23px; color:#FFA185; margin:0 0 20px 0; font-weight:700">
+              <p style="font-size:16px; font-weight:400; line-height:23px; color:#434343; margin:0 0 100px 0;">
                 Por favor, no comparta esta información con nadie.
               </p>
 
               <!-- Divider line -->
-              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:40px 0 20px 0;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin:40px 0 25px 0;">
                 <tr>
                   <td style="border-top:1px solid #eeeeee; font-size:0; line-height:0;">&nbsp;</td>
                 </tr>
               </table>
 
-              <p style="font-family:Arial,sans-serif; font-size:14px; line-height:22px; font-weight:bold; color:#6D737B; margin:0 0 40px 0;">
-                cdf-call © Copyright 2025
+              <p style="font-family:Arial,sans-serif; font-size:14px; line-height:22px; font-weight:700; color:#6D737B; margin:0 0 40px 0;">
+                COORSERPARK © Copyright ${new Date().getFullYear()}
               </p>
 
               <!-- Hidden Username Placeholder -->
@@ -108,7 +112,7 @@ export class CognitoMessagesService {
         <table width="800" border="0" cellspacing="0" cellpadding="0" style="background-color:#ffffff;">
         <!-- Banner Section -->
           <tr>
-            <td style="background-color:#141518;" align="center" valign="middle" height="200">
+            <td style="background-color:#032159;" align="center" valign="middle" height="200">
               <table width="100%" height="200" border="0" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center" valign="middle">
@@ -151,7 +155,7 @@ export class CognitoMessagesService {
               </table>
 
               <p style="font-family:Arial,sans-serif; font-size:14px; line-height:22px; font-weight:bold; color:#6D737B; margin:0 0 40px 0;">
-                cdf-call.COM © Copyright 2025
+                COORSERPARK © Copyright ${new Date().getFullYear()}
               </p>
             </td>
           </tr>
