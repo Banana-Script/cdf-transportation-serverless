@@ -1,9 +1,8 @@
 service: cdf-call-serverless
-frameworkVersion: "3"
+frameworkVersion: "4"
 useDotenv: true
 
 plugins:
-  - serverless-dotenv-plugin
   - serverless-plugin-lambda-insights
   - serverless-offline-ssm
   - serverless-offline
@@ -59,7 +58,7 @@ provider:
   # apiGateway:
   #   restApiId: ${ssm:/${env:PARAMS_ENV}/api-gateway-id}
   #   restApiRootResourceId: ${ssm:/${env:PARAMS_ENV}/api-gateway-root-id}
-  runtime: nodejs18.x
+  runtime: nodejs22.x
   deploymentBucket:
     name: ${ssm:/${env:PARAMS_ENV}/lambda-deploy}
   iam:
