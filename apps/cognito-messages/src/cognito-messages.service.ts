@@ -1,9 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { CustomMessageTriggerEvent } from "aws-lambda";
+import { TwilioService } from "@app/twilio";
 
 @Injectable()
 export class CognitoMessagesService {
-  handleEvent(event: CustomMessageTriggerEvent): CustomMessageTriggerEvent {
+  constructor(private readonly twilioService: TwilioService) {}
+  async handleEvent(
+    event: CustomMessageTriggerEvent
+  ): Promise<CustomMessageTriggerEvent> {
     console.log("event", JSON.stringify(event, null, 2));
 
     const { triggerSource, request } = event;
@@ -22,9 +26,43 @@ export class CognitoMessagesService {
         const codePlaceholder = "{####}";
         const usernamePlaceholder = "{username}";
 
-        emailSubject = "Recuperar contraseña";
+        // Verificar si el usuario tiene teléfono para enviar SMS
+        const hasEmailForgot =
+          userAttributes.email && userAttributes.email_verified !== "false";
+        const hasPhoneForgot =
+          userAttributes.phone_number &&
+          userAttributes.phone_number_verified !== "false";
 
-        emailMessage = `
+        // Si tiene teléfono, enviar SMS
+        if (hasPhoneForgot && userAttributes.phone_number) {
+          const forgotSmsMessage = `Tu código para restablecer la contraseña es: {####}`;
+
+          try {
+            await this.sendSMS(userAttributes.phone_number, forgotSmsMessage);
+            console.log(
+              `[ForgotPassword] SMS de recuperación enviado exitosamente a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
+            );
+
+            // Establecer SMS message para que Cognito envíe por SMS
+            event.response.smsMessage = forgotSmsMessage;
+            return event;
+          } catch (error) {
+            console.error(
+              `[ForgotPassword] Error enviando SMS de recuperación a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}. Error:`, 
+              error
+            );
+            // Si falla, continuar con email como fallback
+          }
+        }
+
+        // Si tiene email o falló el SMS, enviar por email
+        if (hasEmailForgot) {
+          console.log(
+            `[ForgotPassword] Enviando email de recuperación a: ${userAttributes.email} para usuario: ${userAttributes.email}`
+          );
+          emailSubject = "Recuperar contraseña";
+
+          emailMessage = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -91,15 +129,55 @@ export class CognitoMessagesService {
 </body>
 </html>
 `;
-        event.response.emailSubject = emailSubject;
-        event.response.emailMessage = emailMessage;
+          event.response.emailSubject = emailSubject;
+          event.response.emailMessage = emailMessage;
+        } else {
+          // Si no tiene ni email ni teléfono válido
+          console.warn(
+            `[ForgotPassword] Usuario sin email ni teléfono válido para recuperación de contraseña. Username: ${userAttributes.username || 'N/A'}, Email: ${userAttributes.email || 'N/A'}, Phone: ${userAttributes.phone_number || 'N/A'}`
+          );
+        }
         break;
 
       case "CustomMessage_AdminCreateUser":
-        emailSubject = "Contraseña temporal";
+        // Verificar si el usuario fue creado con email o teléfono
+        const hasEmail =
+          userAttributes.email && userAttributes.email_verified !== "false";
+        const hasPhone =
+          userAttributes.phone_number &&
+          userAttributes.phone_number_verified !== "false";
 
-        // Template matching Figma design
-        emailMessage = `
+        // Si tiene teléfono, enviar SMS
+        if (hasPhone && userAttributes.phone_number) {
+          const smsMessage = `Tu contraseña temporal es: {####}`;
+
+          try {
+            await this.sendSMS(userAttributes.phone_number, smsMessage);
+            console.log(
+              `[AdminCreateUser] SMS de contraseña temporal enviado exitosamente a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
+            );
+
+            // Establecer SMS message para que Cognito envíe por SMS
+            event.response.smsMessage = smsMessage;
+            return event;
+          } catch (error) {
+            console.error(
+              `[AdminCreateUser] Error enviando SMS de contraseña temporal a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}. Error:`,
+              error
+            );
+            // Si falla, fallback de envío por email
+          }
+        }
+
+        // Si tiene email, enviar por email (comportamiento por defecto)
+        if (hasEmail) {
+          console.log(
+            `[AdminCreateUser] Enviando email de contraseña temporal a: ${userAttributes.email} para usuario: ${userAttributes.email}`
+          );
+          emailSubject = "Contraseña temporal";
+
+          // Template matching Figma design
+          emailMessage = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -167,8 +245,14 @@ export class CognitoMessagesService {
 </html>
 `;
 
-        event.response.emailSubject = emailSubject;
-        event.response.emailMessage = emailMessage;
+          event.response.emailSubject = emailSubject;
+          event.response.emailMessage = emailMessage;
+        } else {
+          // Si no tiene ni email ni teléfono válido, usar comportamiento por defecto
+          console.warn(
+            `[AdminCreateUser] Usuario sin email ni teléfono válido para contraseña temporal. Username: ${userAttributes.username || 'N/A'}, Email: ${userAttributes.email || 'N/A'}, Phone: ${userAttributes.phone_number || 'N/A'}`
+          );
+        }
         break;
 
       default:
@@ -181,5 +265,20 @@ export class CognitoMessagesService {
       event
     );
     return event;
+  }
+
+  async sendSMS(phoneNumber: string, message: string, fromNumber?: string) {
+    try {
+      const result = await this.twilioService.sendSMS(
+        phoneNumber,
+        message,
+        fromNumber
+      );
+      console.log("SMS sent successfully:", result);
+      return result;
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      throw error;
+    }
   }
 }

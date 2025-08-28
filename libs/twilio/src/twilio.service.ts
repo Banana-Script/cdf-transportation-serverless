@@ -30,4 +30,38 @@ export class TwilioService {
     console.log('🤖 ~ twilio.service.ts:36 ~ TwilioService ~ call:', call);
     return { id: call.sid, to: call.to, from: call.from, status: call.status };
   }
+
+  async sendSMS(
+    to: string,
+    message: string,
+    from?: string
+  ): Promise<{ id: string; to: string; from: string; status: string; body: string }> {
+    const fromNumber = from || process.env.TWILIO_PHONE_NUMBER;
+    
+    if (!fromNumber) {
+      throw new Error('TWILIO_PHONE_NUMBER environment variable is required');
+    }
+
+    const formattedTo = to.startsWith('+') ? to : `+${to}`;
+    
+    try {
+      const sms = await this.client.messages.create({
+        body: message,
+        from: fromNumber,
+        to: formattedTo,
+      });
+
+      console.log('SMS sent successfully:', sms.sid);
+      return {
+        id: sms.sid,
+        to: sms.to,
+        from: sms.from,
+        status: sms.status,
+        body: sms.body
+      };
+    } catch (error) {
+      console.error('Error sending SMS:', error);
+      throw error;
+    }
+  }
 }
