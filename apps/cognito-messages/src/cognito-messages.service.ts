@@ -35,7 +35,11 @@ export class CognitoMessagesService {
 
         // Si tiene teléfono, enviar SMS
         if (hasPhoneForgot && userAttributes.phone_number) {
-          const forgotSmsMessage = `Tu código para restablecer la contraseña en COORSERPARK es: ${event.request.codeParameter}`;
+          console.log('DEBUG ForgotPassword - event.request:', JSON.stringify(event.request, null, 2));
+          console.log('DEBUG ForgotPassword - codeParameter:', event.request.codeParameter);
+          console.log('DEBUG ForgotPassword - usernameParameter:', event.request.usernameParameter);
+          const password = event.request.usernameParameter || event.request.codeParameter || '{####}';
+          const forgotSmsMessage = `Tu código para restablecer la contraseña en COORSERPARK es: ${password}`;
 
           try {
             await this.sendSMS(userAttributes.phone_number, forgotSmsMessage);
@@ -43,8 +47,7 @@ export class CognitoMessagesService {
               `[ForgotPassword] SMS de recuperación enviado exitosamente a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
             );
 
-            // Establecer SMS message para que Cognito envíe por SMS
-            event.response.smsMessage = forgotSmsMessage;
+            // SMS enviado por Twilio solamente
             return event;
           } catch (error) {
             console.error(
@@ -157,7 +160,11 @@ export class CognitoMessagesService {
 
         // Si tiene teléfono, enviar SMS
         if (hasPhone && userAttributes.phone_number) {
-          const smsMessage = `Tu contraseña temporal en COORSERPARK es: ${event.request.codeParameter}`;
+          console.log('DEBUG AdminCreateUser - event.request:', JSON.stringify(event.request, null, 2));
+          console.log('DEBUG AdminCreateUser - codeParameter:', event.request.codeParameter);
+          console.log('DEBUG AdminCreateUser - usernameParameter:', event.request.usernameParameter);
+          const password = event.request.usernameParameter || event.request.codeParameter;
+          const smsMessage = `Tu contraseña temporal en COORSERPARK es: ${password}`;
 
           try {
             await this.sendSMS(userAttributes.phone_number, smsMessage);
@@ -165,8 +172,7 @@ export class CognitoMessagesService {
               `[AdminCreateUser] SMS de contraseña temporal enviado exitosamente a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
             );
 
-            // Establecer SMS message para que Cognito envíe por SMS
-            event.response.smsMessage = smsMessage;
+            // SMS enviado por Twilio solamente
             return event;
           } catch (error) {
             console.error(
