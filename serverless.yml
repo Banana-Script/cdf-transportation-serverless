@@ -33,6 +33,10 @@ custom:
       "/dev/private-subnet-2": "subnet-09bdf2ec74d73d844"
       "/dev/region": ${env:REGION, 'us-east-1'}
       "/dev/params-env": ${env:PARAMS_ENV, 'undefined'}
+      "/dev/twilio_account_sid": ${env:TWILIO_ACCOUNT_SID, 'undefined'}
+      "/dev/twilio_auth_token": ${env:TWILIO_AUTH_TOKEN, 'undefined'}
+      "/dev/twilio_phone_number": ${env:TWILIO_PHONE_NUMBER, 'undefined'}
+      "/dev/twilio_sms_number": ${env:TWILIO_SMS_NUMBER, 'undefined'}
   serverless-offline:
     useChildProcesses: true
   secrets:
