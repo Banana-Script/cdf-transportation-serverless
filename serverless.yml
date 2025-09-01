@@ -52,6 +52,10 @@ custom:
     files_bucket: ${ssm:/${env:PARAMS_ENV}/files-bucket}
     app_domain: ${ssm:/${env:PARAMS_ENV}/app-domain}
     env: ${ssm:/${env:PARAMS_ENV}/params-env}
+    twilio_account_sid: ${ssm:/${env:PARAMS_ENV}/twilio_account_sid}
+    twilio_auth_token: ${ssm:/${env:PARAMS_ENV}/twilio_auth_token}
+    twilio_phone_number: ${ssm:/${env:PARAMS_ENV}/twilio_phone_number}
+    twilio_sms_number: ${ssm:/${env:PARAMS_ENV}/twilio_sms_number}
 
 provider:
   name: aws
@@ -87,6 +91,10 @@ provider:
     FILES_BUCKET: ${self:custom.secrets.files_bucket}
     APP_DOMAIN: ${self:custom.secrets.app_domain}
     ENV: ${self:custom.secrets.env}
+    TWILIO_ACCOUNT_SID: ${self:custom.secrets.twilio_account_sid}
+    TWILIO_AUTH_TOKEN: ${self:custom.secrets.twilio_auth_token}
+    TWILIO_PHONE_NUMBER: ${self:custom.secrets.twilio_phone_number}
+    TWILIO_SMS_NUMBER: ${self:custom.secrets.twilio_sms_number}
 package:
   individually: true
   patterns:
