@@ -35,7 +35,7 @@ export class CognitoMessagesService {
 
         // Si tiene teléfono, enviar SMS
         if (hasPhoneForgot && userAttributes.phone_number) {
-          const forgotSmsMessage = `Tu código para restablecer la contraseña en COORSERPARK es: {####}`;
+          const forgotSmsMessage = `Tu código para restablecer la contraseña en COORSERPARK es: ${event.request.codeParameter}`;
 
           try {
             await this.sendSMS(userAttributes.phone_number, forgotSmsMessage);
@@ -157,7 +157,7 @@ export class CognitoMessagesService {
 
         // Si tiene teléfono, enviar SMS
         if (hasPhone && userAttributes.phone_number) {
-          const smsMessage = `Tu contraseña temporal en COORSERPARK es: {####}`;
+          const smsMessage = `Tu contraseña temporal en COORSERPARK es: ${event.request.codeParameter}`;
 
           try {
             await this.sendSMS(userAttributes.phone_number, smsMessage);
