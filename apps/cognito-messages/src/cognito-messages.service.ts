@@ -38,8 +38,8 @@ export class CognitoMessagesService {
           console.log('DEBUG ForgotPassword - event.request:', JSON.stringify(event.request, null, 2));
           console.log('DEBUG ForgotPassword - codeParameter:', event.request.codeParameter);
           console.log('DEBUG ForgotPassword - usernameParameter:', event.request.usernameParameter);
-          const password = event.request.usernameParameter || event.request.codeParameter || '{####}';
-          const forgotSmsMessage = `Tu código para restablecer la contraseña en COORSERPARK es: ${password}`;
+          const code = event.request.codeParameter || '{####}';
+          const forgotSmsMessage = `Tu código para restablecer la contraseña en COORSERPARK es: ${code}`;
 
           try {
             await this.sendSMS(userAttributes.phone_number, forgotSmsMessage);
@@ -160,10 +160,8 @@ export class CognitoMessagesService {
 
         // Si tiene teléfono, enviar SMS
         if (hasPhone && userAttributes.phone_number) {
-          console.log('DEBUG AdminCreateUser - event.request:', JSON.stringify(event.request, null, 2));
-          console.log('DEBUG AdminCreateUser - codeParameter:', event.request.codeParameter);
-          console.log('DEBUG AdminCreateUser - usernameParameter:', event.request.usernameParameter);
-          const password = event.request.usernameParameter || event.request.codeParameter;
+          console.log('DISABLED - DEBUG AdminCreateUser - event.request:', JSON.stringify(event.request, null, 2));
+          /*const password = event.request.usernameParameter || event.request.codeParameter;
           const smsMessage = `Tu contraseña temporal en COORSERPARK es: ${password}`;
 
           try {
@@ -180,7 +178,7 @@ export class CognitoMessagesService {
               error
             );
             // Si falla, fallback de envío por email
-          }
+          }*/
         }
 
         // Si tiene email, enviar por email (comportamiento por defecto)
