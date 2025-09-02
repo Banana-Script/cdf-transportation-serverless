@@ -106,6 +106,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/cognito-messages/tsconfig.app.json"
       }
+    },
+    "custom-sms-sender": {
+      "type": "application",
+      "root": "apps/custom-sms-sender",
+      "entryFile": "main",
+      "sourceRoot": "apps/custom-sms-sender/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/custom-sms-sender/tsconfig.app.json"
+      }
     }
   }
 }
