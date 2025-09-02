@@ -156,7 +156,7 @@ resources:
             - Sid: Allow Lambda Function
               Effect: Allow
               Principal:
-                AWS: !GetAtt IamRoleLambdaExecution.Arn
+                AWS: ${ssm:/${env:PARAMS_ENV}/lambda-role}
               Action:
                 - kms:Decrypt
                 - kms:DescribeKey
