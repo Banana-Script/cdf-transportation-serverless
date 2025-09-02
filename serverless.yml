@@ -121,6 +121,13 @@ functions:
       patterns:
         - dist/apps/custom-sms-sender/**
 
+  #nest build users && serverless invoke local -f users -p ./apps/users/event.json
+  users:
+    handler: dist/apps/users/main.handler
+    package:
+      patterns:
+        - dist/apps/users/**
+
 resources:
   Resources:
     CognitoSMSKmsKey:
