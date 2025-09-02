@@ -87,19 +87,49 @@ export class CustomSMSSenderService {
 
   private async decryptCode(encryptedCode: string): Promise<string> {
     try {
+      console.log('Código encriptado recibido:', encryptedCode);
+      console.log('Longitud del código:', encryptedCode.length);
+      
+      // Validar que el código no esté vacío
+      if (!encryptedCode || encryptedCode.trim().length === 0) {
+        throw new Error('El código encriptado está vacío');
+      }
+
+      // Intentar decodificar base64 para validar formato
+      let ciphertextBuffer: Buffer;
+      try {
+        ciphertextBuffer = Buffer.from(encryptedCode, 'base64');
+        console.log('Buffer creado exitosamente, tamaño:', ciphertextBuffer.length);
+      } catch (error) {
+        console.error('Error creando buffer desde base64:', error);
+        throw new Error('El código encriptado no es un base64 válido');
+      }
+
       const params = {
-        CiphertextBlob: Buffer.from(encryptedCode, 'base64'),
+        CiphertextBlob: ciphertextBuffer,
       };
 
+      console.log('Intentando desencriptar con KMS...');
       const result = await this.kms.decrypt(params).promise();
       
       if (!result.Plaintext) {
-        throw new Error('No se pudo desencriptar el código');
+        throw new Error('KMS retornó resultado vacío');
       }
 
-      return result.Plaintext.toString('utf-8');
+      const decryptedCode = result.Plaintext.toString('utf-8');
+      console.log('Desencriptación exitosa, código tiene longitud:', decryptedCode.length);
+      
+      return decryptedCode;
     } catch (error) {
       console.error('Error desencriptando código:', error);
+      console.error('Tipo de error:', error.constructor.name);
+      console.error('Código de error:', error.code);
+      
+      // Re-lanzar con más información
+      if (error.code === 'InvalidCiphertextException') {
+        throw new Error(`InvalidCiphertextException: El código encriptado no es válido o la clave KMS no coincide. Código original: ${encryptedCode.substring(0, 50)}...`);
+      }
+      
       throw error;
     }
   }
