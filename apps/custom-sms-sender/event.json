@@ -1,0 +1,16 @@
+{
+  "version": "1",
+  "triggerSource": "CustomSMSSender_SignUp",
+  "region": "us-east-1",
+  "userPoolId": "us-east-1_XXXXXXXXX",
+  "userName": "test-user",
+  "callerContext": {
+    "awsSdkVersion": "2.x.x",
+    "clientId": "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "request": {
+    "type": "customSMSSender",
+    "message": "Your verification code is {####}",
+    "code": "base64-encoded-encrypted-code-here"
+  }
+}

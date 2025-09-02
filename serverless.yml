@@ -113,3 +113,72 @@ functions:
     package:
       patterns:
         - dist/apps/cognito-messages/**
+
+  #nest build custom-sms-sender && serverless invoke local -f custom-sms-sender -p ./apps/custom-sms-sender/event.json
+  custom-sms-sender:
+    handler: dist/apps/custom-sms-sender/main.handler
+    package:
+      patterns:
+        - dist/apps/custom-sms-sender/**
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: "*"
+      - Effect: Allow
+        Action:
+          - cognito-idp:AdminGetUser
+        Resource: "*"
+
+resources:
+  Resources:
+    CognitoSMSKmsKey:
+      Type: AWS::KMS::Key
+      Properties:
+        Description: "KMS key for Cognito Custom SMS Sender encryption"
+        KeyPolicy:
+          Statement:
+            - Sid: Enable IAM User Permissions
+              Effect: Allow
+              Principal:
+                AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+              Action: "kms:*"
+              Resource: "*"
+            - Sid: Allow Cognito Service
+              Effect: Allow
+              Principal:
+                Service: cognito-idp.amazonaws.com
+              Action:
+                - kms:Encrypt
+                - kms:Decrypt
+                - kms:ReEncrypt*
+                - kms:GenerateDataKey*
+                - kms:DescribeKey
+              Resource: "*"
+            - Sid: Allow Lambda Function
+              Effect: Allow
+              Principal:
+                AWS: !GetAtt IamRoleLambdaExecution.Arn
+              Action:
+                - kms:Decrypt
+                - kms:DescribeKey
+              Resource: "*"
+    
+    CognitoSMSKmsKeyAlias:
+      Type: AWS::KMS::Alias
+      Properties:
+        AliasName: alias/cognito-sms-sender-key
+        TargetKeyId: !Ref CognitoSMSKmsKey
+
+  Outputs:
+    CognitoSMSKmsKeyId:
+      Description: "KMS Key ID for Cognito SMS Sender"
+      Value: !Ref CognitoSMSKmsKey
+      Export:
+        Name: ${self:service}-${self:provider.stage}-CognitoSMSKmsKeyId
+    
+    CognitoSMSKmsKeyArn:
+      Description: "KMS Key ARN for Cognito SMS Sender"
+      Value: !GetAtt CognitoSMSKmsKey.Arn
+      Export:
+        Name: ${self:service}-${self:provider.stage}-CognitoSMSKmsKeyArn
