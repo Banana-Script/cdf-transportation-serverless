@@ -71,6 +71,15 @@ provider:
     name: ${ssm:/${env:PARAMS_ENV}/lambda-deploy}
   iam:
     role: ${ssm:/${env:PARAMS_ENV}/lambda-role}
+    roleStatements:
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: "*"
+      - Effect: Allow
+        Action:
+          - cognito-idp:AdminGetUser
+        Resource: "*"
   vpc:
     securityGroupIds:
       - ${ssm:/${env:PARAMS_ENV}/lambda-sg}
@@ -120,15 +129,6 @@ functions:
     package:
       patterns:
         - dist/apps/custom-sms-sender/**
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - kms:Decrypt
-        Resource: "*"
-      - Effect: Allow
-        Action:
-          - cognito-idp:AdminGetUser
-        Resource: "*"
 
 resources:
   Resources:
