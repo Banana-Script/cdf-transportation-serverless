@@ -24,7 +24,9 @@ export class CustomSMSSenderService {
   private kms: KMS;
 
   constructor(private readonly twilioService: TwilioService) {
-    this.kms = new KMS({ region: process.env.REGION || 'us-east-1' });
+    const region = process.env.REGION || 'us-east-1';
+    console.log('Inicializando KMS con región:', region);
+    this.kms = new KMS({ region });
   }
 
   async handleEvent(event: CustomSMSSenderEvent): Promise<void> {
@@ -107,10 +109,18 @@ export class CustomSMSSenderService {
 
       const params = {
         CiphertextBlob: ciphertextBuffer,
+        // No especificar KeyId - KMS usará automáticamente la clave correcta
       };
 
       console.log('Intentando desencriptar con KMS...');
+      console.log('Región de KMS configurada:', this.kms.config.region);
+      
+      // Extraer información de la clave del ciphertext para debugging
+      console.log('Los primeros 100 chars del ciphertext:', encryptedCode.substring(0, 100));
+      
       const result = await this.kms.decrypt(params).promise();
+      
+      console.log('KeyId utilizada por KMS:', result.KeyId);
       
       if (!result.Plaintext) {
         throw new Error('KMS retornó resultado vacío');
