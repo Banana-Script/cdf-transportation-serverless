@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { TwilioService } from '@app/twilio';
-import { KMS } from 'aws-sdk';
+import { Injectable } from "@nestjs/common";
+import { TwilioService } from "@app/twilio";
+// Import AWS Encryption SDK as per Cognito documentation
+import { KmsKeyringNode, buildClient, CommitmentPolicy } from '@aws-crypto/client-node';
 
 interface CustomSMSSenderEvent {
   version: string;
@@ -21,56 +22,66 @@ interface CustomSMSSenderEvent {
 
 @Injectable()
 export class CustomSMSSenderService {
-  private kms: KMS;
+  private readonly encryptionClient: { encrypt: any; decrypt: any };
 
   constructor(private readonly twilioService: TwilioService) {
-    const region = process.env.REGION || 'us-east-1';
-    console.log('Inicializando KMS con región:', region);
-    this.kms = new KMS({ region });
+    console.log("Inicializando Custom SMS Sender Service");
+    console.log("NODE_ENV:", process.env.NODE_ENV);
+    console.log("AWS_PROFILE:", process.env.AWS_PROFILE);
+
+    // Initialize AWS Encryption SDK client with proper commitment policy
+    this.encryptionClient = buildClient(
+      CommitmentPolicy.REQUIRE_ENCRYPT_ALLOW_DECRYPT
+    );
   }
 
   async handleEvent(event: CustomSMSSenderEvent): Promise<void> {
-    console.log('Custom SMS Sender Event:', JSON.stringify(event, null, 2));
+    // console.log('Custom SMS Sender Event:', JSON.stringify(event, null, 2));
 
     const { request, triggerSource, userName } = event;
-    
+
     try {
       // Desencriptar el código usando KMS
-      const decryptedCode = await this.decryptCode(request.code);
-      console.log('Código desencriptado exitosamente');
+      const decryptedCode = await this.decryptCode(request.code, event.userPoolId);
+      console.log("Código desencriptado exitosamente");
 
       // Determinar el número de teléfono del usuario
-      const phoneNumber = await this.getUserPhoneNumber(event.userPoolId, userName);
-      
+      const phoneNumber = await this.getUserPhoneNumber(
+        event.userPoolId,
+        userName
+      );
+
       if (!phoneNumber) {
-        throw new Error(`No se encontró número de teléfono para el usuario: ${userName}`);
+        throw new Error(
+          `No se encontró número de teléfono para el usuario: ${userName}`
+        );
       }
 
       // Construir el mensaje personalizado según el tipo
-      let message = '';
-      
+      let message = "";
+
       switch (triggerSource) {
-        case 'CustomSMSSender_SignUp':
-        case 'CustomSMSSender_ResendCode':
+        case "CustomSMSSender_SignUp":
+        case "CustomSMSSender_ResendCode":
           message = `Tu código de verificación para COORSERPARK APP es: ${decryptedCode}`;
           break;
-          
-        case 'CustomSMSSender_ForgotPassword':
+
+        case "CustomSMSSender_ForgotPassword":
           message = `Tu código para restablecer la contraseña en COORSERPARK APP es: ${decryptedCode}`;
           break;
-          
-        case 'CustomSMSSender_UpdateUserAttribute':
+
+        case "CustomSMSSender_UpdateUserAttribute":
           message = `Tu código de verificación para actualizar información en COORSERPARK APP es: ${decryptedCode}`;
           break;
-          
-        case 'CustomSMSSender_VerifyUserAttribute':
+
+        case "CustomSMSSender_VerifyUserAttribute":
           message = `Tu código de verificación de atributo para COORSERPARK APP es: ${decryptedCode}`;
           break;
-          
-        case 'CustomSMSSender_Authentication':
+
+        case "CustomSMSSender_Authentication":
           message = `Tu código de autenticación para COORSERPARK APP es: ${decryptedCode}`;
           break;
-          
+
         default:
           message = `Tu código de verificación para COORSERPARK APP es: ${decryptedCode}`;
           break;
@@ -78,78 +89,107 @@ export class CustomSMSSenderService {
 
       // Enviar SMS por Twilio
       await this.twilioService.sendSMS(phoneNumber, message);
-      
-      console.log(`[${triggerSource}] SMS enviado exitosamente por Twilio a: ${phoneNumber} para usuario: ${userName}`);
 
+      console.log(
+        `[${triggerSource}] SMS enviado exitosamente por Twilio a: ${phoneNumber} para usuario: ${userName}`
+      );
     } catch (error) {
-      console.error(`Error en Custom SMS Sender para usuario ${userName}:`, error);
+      console.error(
+        `Error en Custom SMS Sender para usuario ${userName}:`,
+        error
+      );
       throw error;
     }
   }
 
-  private async decryptCode(encryptedCode: string): Promise<string> {
+  private async decryptCode(encryptedCode: string, userPoolId?: string): Promise<string> {
     try {
-      console.log('Código encriptado recibido:', encryptedCode);
-      console.log('Longitud del código:', encryptedCode.length);
-      
+      console.log("Código encriptado recibido:", encryptedCode);
+      console.log("User Pool ID:", userPoolId);
+
       // Validar que el código no esté vacío
       if (!encryptedCode || encryptedCode.trim().length === 0) {
-        throw new Error('El código encriptado está vacío');
+        throw new Error("El código encriptado está vacío");
       }
 
-      // Intentar decodificar base64 para validar formato
-      let ciphertextBuffer: Buffer;
-      try {
-        ciphertextBuffer = Buffer.from(encryptedCode, 'base64');
-        console.log('Buffer creado exitosamente, tamaño:', ciphertextBuffer.length);
-      } catch (error) {
-        console.error('Error creando buffer desde base64:', error);
-        throw new Error('El código encriptado no es un base64 válido');
-      }
+      // Decode base64 encrypted code
+      const ciphertextBuffer = Buffer.from(encryptedCode, "base64");
+      console.log("Buffer creado, tamaño:", ciphertextBuffer.length);
 
-      const params = {
-        CiphertextBlob: ciphertextBuffer,
-        // No especificar KeyId - KMS usará automáticamente la clave correcta
-      };
-
-      console.log('Intentando desencriptar con KMS...');
-      console.log('Región de KMS configurada:', this.kms.config.region);
+      // Create KMS keyring in discovery mode to let it find the key from ciphertext
+      const keyring = new KmsKeyringNode({ 
+        discovery: true 
+      });
       
-      // Extraer información de la clave del ciphertext para debugging
-      console.log('Los primeros 100 chars del ciphertext:', encryptedCode.substring(0, 100));
+      console.log("🔐 Usando AWS Encryption SDK para desencriptar...");
       
-      const result = await this.kms.decrypt(params).promise();
+      // Decrypt using AWS Encryption SDK with proper client instance
+      const { decrypt } = this.encryptionClient;
+      const { plaintext, messageHeader } = await decrypt(keyring, ciphertextBuffer);
       
-      console.log('KeyId utilizada por KMS:', result.KeyId);
+      console.log("✅ Desencriptación exitosa con AWS Encryption SDK");
+      console.log("Encryption context:", messageHeader.encryptionContext);
       
-      if (!result.Plaintext) {
-        throw new Error('KMS retornó resultado vacío');
-      }
-
-      const decryptedCode = result.Plaintext.toString('utf-8');
-      console.log('Desencriptación exitosa, código tiene longitud:', decryptedCode.length);
+      const decryptedCode = plaintext.toString('utf-8');
+      console.log("Código desencriptado, longitud:", decryptedCode.length);
       
-      return decryptedCode;
+      // Unescape HTML characters as per documentation
+      const unescapedCode = decryptedCode
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;/g, "'");
+      
+      console.log("Código final después de unescape:", unescapedCode);
+      return unescapedCode;
     } catch (error) {
-      console.error('Error desencriptando código:', error);
-      console.error('Tipo de error:', error.constructor.name);
-      console.error('Código de error:', error.code);
-      
-      // Re-lanzar con más información
-      if (error.code === 'InvalidCiphertextException') {
-        throw new Error(`InvalidCiphertextException: El código encriptado no es válido o la clave KMS no coincide. Código original: ${encryptedCode.substring(0, 50)}...`);
+      console.error("Error desencriptando código:", error);
+      console.error("Tipo de error:", error.constructor.name);
+      console.error("Código de error:", error.code);
+      console.error("Mensaje de error:", error.message);
+
+      // Log additional diagnostic info for UnrecognizedClientException
+      if (error.code === "UnrecognizedClientException") {
+        console.error("🚨 DIAGNÓSTICO: Token de seguridad inválido");
+        console.error("- Verifique que Lambda use rol IAM correctamente");
+        console.error(
+          "- Rol configurado:",
+          process.env.AWS_ROLE_ARN || "No configurado"
+        );
+        console.error(
+          "- Región Lambda:",
+          process.env.AWS_REGION || process.env.REGION
+        );
+        console.error("- NODE_ENV actual:", process.env.NODE_ENV);
       }
-      
+
+      // Re-lanzar con más información para producción
+      if (error.code === "InvalidCiphertextException") {
+        throw new Error(
+          `InvalidCiphertextException: El código encriptado no es válido o la clave KMS no coincide. Código: ${encryptedCode.substring(0, 50)}...`
+        );
+      }
+
+      if (error.code === "UnrecognizedClientException") {
+        throw new Error(
+          `UnrecognizedClientException: Token de seguridad inválido. Verifique configuración de IAM role y región.`
+        );
+      }
+
       throw error;
     }
   }
 
-  private async getUserPhoneNumber(userPoolId: string, userName: string): Promise<string | null> {
+  private async getUserPhoneNumber(
+    userPoolId: string,
+    userName: string
+  ): Promise<string | null> {
     try {
       // Importar CognitoIdentityServiceProvider aquí para evitar problemas de importación
-      const { CognitoIdentityServiceProvider } = await import('aws-sdk');
-      const cognito = new CognitoIdentityServiceProvider({ 
-        region: process.env.REGION || 'us-east-1' 
+      const { CognitoIdentityServiceProvider } = await import("aws-sdk");
+      const cognito = new CognitoIdentityServiceProvider({
+        region: process.env.REGION || "us-east-1",
       });
 
       const params = {
@@ -158,14 +198,14 @@ export class CustomSMSSenderService {
       };
 
       const result = await cognito.adminGetUser(params).promise();
-      
+
       const phoneNumberAttr = result.UserAttributes?.find(
-        attr => attr.Name === 'phone_number'
+        (attr) => attr.Name === "phone_number"
       );
 
       return phoneNumberAttr?.Value || null;
     } catch (error) {
-      console.error('Error obteniendo número de teléfono del usuario:', error);
+      console.error("Error obteniendo número de teléfono del usuario:", error);
       throw error;
     }
   }

@@ -1,16 +1,25 @@
 {
   "version": "1",
-  "triggerSource": "CustomSMSSender_SignUp",
+  "triggerSource": "CustomSMSSender_AdminCreateUser",
   "region": "us-east-1",
-  "userPoolId": "us-east-1_XXXXXXXXX",
-  "userName": "test-user",
+  "userPoolId": "us-east-1_Hy7Agl1S3",
+  "userName": "+573204229544",
   "callerContext": {
-    "awsSdkVersion": "2.x.x",
-    "clientId": "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+    "awsSdkVersion": "aws-sdk-js-3.699.0",
+    "clientId": "CLIENT_ID_NOT_APPLICABLE"
   },
   "request": {
-    "type": "customSMSSender",
-    "message": "Your verification code is {####}",
-    "code": "base64-encoded-encrypted-code-here"
+    "type": "customSMSSenderRequestV1",
+    "code": "AYADeBQF/6Yyrukaai8FefqfXdMAgQACABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREFsc3FkNE9TbDJEUktscXlpenBhQjd3ZUZva254dmVaZVhjaEphOGt5MDJQaU5YVkhNMjBSNmFTdGhkb3BtWUU5UT09AAt1c2VycG9vbC1pZAATdXMtZWFzdC0xX0h5N0FnbDFTMwABAAdhd3Mta21zAEthcm46YXdzOmttczp1cy1lYXN0LTE6NjIzOTQ2MDkwNzk5OmtleS82NDQ3NTRiYy1hN2UzLTRiNDEtOWIwNC1iOTQzOTEwM2M2MTkAuAECAQB4zPzSq5FNbEZiPqQ2AQfMOcImWZdAEE83nmCSiTxXy3sBebso7Jef589qRTIw+7iQKAAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDOVeEwwEoLy7cO14wQIBEIA7jevwMiBXAbQmRfxHpjPrqXNNDDVYfZKBNATIi5xXi1+wa6Z/Dd2vpHrFgyROI3TJ7JG4HjckC9y6C6cCAAAAAAwAABAAAAAAAAAAAAAAAAAAMgpybPuEMYIm4P0bZKCOxv////8AAAABAAAAAAAAAAAAAAABAAAACJsUIDPtTWTe9SnS0qKCCK65ztCFrYx5+wBnMGUCMQCf9QHKKe9Avl0VK9SEUQyhdlwkRgESpnWJbdj7JinbgC6a+8ZhzPssjrBCkbL4+LUCMB2tI4+JZk0OXu3Jrk89sjhdcwzTvXWA4rrhPQ2ofX0K4BbMLpvK5JYjrYTVY60DfA==",
+    "clientMetadata": null,
+    "userAttributes": {
+      "sub": "a40804d8-e0d1-70b0-21b3-dbbbfa0c03b3",
+      "cognito:user_status": "FORCE_CHANGE_PASSWORD",
+      "profile": "Conductor",
+      "name": "Wilfer Conductor AH",
+      "phone_number_verified": "true",
+      "phone_number": "+573204229544",
+      "preferred_username": "+573204229544"
+    }
   }
 }

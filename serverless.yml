@@ -37,6 +37,7 @@ custom:
       "/dev/twilio_auth_token": ${env:TWILIO_AUTH_TOKEN, 'undefined'}
       "/dev/twilio_phone_number": ${env:TWILIO_PHONE_NUMBER, 'undefined'}
       "/dev/twilio_sms_number": ${env:TWILIO_SMS_NUMBER, 'undefined'}
+      "/dev/cognito-kms-key-arn": ${env:COGNITO_KMS_KEY_ARN, 'arn:aws:kms:us-east-1:623946090799:key/644754bc-a7e3-4b41-9b04-b9439103c619'}
   serverless-offline:
     useChildProcesses: true
   secrets:
@@ -56,6 +57,7 @@ custom:
     twilio_auth_token: ${ssm:/${env:PARAMS_ENV}/twilio_auth_token}
     twilio_phone_number: ${ssm:/${env:PARAMS_ENV}/twilio_phone_number}
     twilio_sms_number: ${ssm:/${env:PARAMS_ENV}/twilio_sms_number}
+    cognito_kms_key_arn: ${ssm:/${env:PARAMS_ENV}/cognito-kms-key-arn}
 
 provider:
   name: aws
@@ -114,9 +116,11 @@ functions:
       patterns:
         - dist/apps/cognito-messages/**
 
-  #nest build custom-sms-sender && serverless invoke local -f custom-sms-sender -p ./apps/custom-sms-sender/event.json
+  #nest build custom-sms-sender && serverless invoke local -f custom-sms-sender -p ./apps/custom-sms-sender/event.json --stage local
   custom-sms-sender:
     handler: dist/apps/custom-sms-sender/main.handler
+    environment:
+      COGNITO_KMS_KEY_ARN: ${ssm:/${env:PARAMS_ENV}/cognito-kms-key-arn}
     package:
       patterns:
         - dist/apps/custom-sms-sender/**
@@ -128,55 +132,7 @@ functions:
       patterns:
         - dist/apps/users/**
 
-resources:
-  Resources:
-    CognitoSMSKmsKey:
-      Type: AWS::KMS::Key
-      Properties:
-        Description: "KMS key for Cognito Custom SMS Sender encryption"
-        KeyPolicy:
-          Statement:
-            - Sid: Enable IAM User Permissions
-              Effect: Allow
-              Principal:
-                AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-              Action: "kms:*"
-              Resource: "*"
-            - Sid: Allow Cognito Service
-              Effect: Allow
-              Principal:
-                Service: cognito-idp.amazonaws.com
-              Action:
-                - kms:Encrypt
-                - kms:Decrypt
-                - kms:ReEncrypt*
-                - kms:GenerateDataKey*
-                - kms:DescribeKey
-              Resource: "*"
-            - Sid: Allow Lambda Function
-              Effect: Allow
-              Principal:
-                AWS: ${ssm:/${env:PARAMS_ENV}/lambda-role}
-              Action:
-                - kms:Decrypt
-                - kms:DescribeKey
-              Resource: "*"
-    
-    CognitoSMSKmsKeyAlias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/cognito-sms-sender-key
-        TargetKeyId: !Ref CognitoSMSKmsKey
-
-  Outputs:
-    CognitoSMSKmsKeyId:
-      Description: "KMS Key ID for Cognito SMS Sender"
-      Value: !Ref CognitoSMSKmsKey
-      Export:
-        Name: ${self:service}-${self:provider.stage}-CognitoSMSKmsKeyId
-    
-    CognitoSMSKmsKeyArn:
-      Description: "KMS Key ARN for Cognito SMS Sender"
-      Value: !GetAtt CognitoSMSKmsKey.Arn
-      Export:
-        Name: ${self:service}-${self:provider.stage}-CognitoSMSKmsKeyArn
+# Using existing KMS key instead of creating new one
+# resources:
+#   Resources: (removed - using existing KMS key)
+#   Outputs: (removed - using existing KMS key)
