@@ -33,38 +33,11 @@ export class CognitoMessagesService {
           userAttributes.phone_number &&
           userAttributes.phone_number_verified !== "false";
 
-        // Si tiene teléfono, enviar SMS
+        // Log si tiene teléfono (SMS deshabilitado - solo logging)
         if (hasPhoneForgot && userAttributes.phone_number) {
           console.log(
-            "DEBUG ForgotPassword - event.request:",
-            JSON.stringify(event.request, null, 2)
+            `[ForgotPassword] SMS DESHABILITADO - Usuario con teléfono: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
           );
-          console.log(
-            "DEBUG ForgotPassword - codeParameter:",
-            event.request.codeParameter
-          );
-          console.log(
-            "DEBUG ForgotPassword - usernameParameter:",
-            event.request.usernameParameter
-          );
-          const code = event.request.codeParameter || '{####}';
-          const forgotSmsMessage = 'Your username is {username} and temporary password is {####}.';
-
-          try {
-            await this.sendSMS(userAttributes.phone_number, forgotSmsMessage);
-            console.log(
-              `[ForgotPassword] SMS de recuperación enviado exitosamente a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
-            );
-
-            // SMS enviado por Twilio solamente
-            return event;
-          } catch (error) {
-            console.error(
-              `[ForgotPassword] Error enviando SMS de recuperación a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}. Error:`,
-              error
-            );
-            // Si falla, continuar con email como fallback
-          }
         } 
         
         if (hasEmailForgot) {
@@ -166,30 +139,11 @@ export class CognitoMessagesService {
           userAttributes.phone_number &&
           userAttributes.phone_number_verified !== "false";
 
-        // Si tiene teléfono, enviar SMS
+        // Log si tiene teléfono (SMS deshabilitado - solo logging)
         if (hasPhone && userAttributes.phone_number) {
           console.log(
-            "DISABLED - DEBUG AdminCreateUser - event.request:",
-            JSON.stringify(event.request, null, 2)
+            `[AdminCreateUser] SMS DESHABILITADO - Usuario con teléfono: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
           );
-          /*const password = event.request.usernameParameter || event.request.codeParameter;
-          const smsMessage = `Tu contraseña temporal en COORSERPARK es: ${password}`;
-
-          try {
-            await this.sendSMS(userAttributes.phone_number, smsMessage);
-            console.log(
-              `[AdminCreateUser] SMS de contraseña temporal enviado exitosamente a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
-            );
-
-            // SMS enviado por Twilio solamente
-            return event;
-          } catch (error) {
-            console.error(
-              `[AdminCreateUser] Error enviando SMS de contraseña temporal a: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}. Error:`,
-              error
-            );
-            // Si falla, fallback de envío por email
-          }*/
         }
 
         // Si tiene email, enviar por email (comportamiento por defecto)
