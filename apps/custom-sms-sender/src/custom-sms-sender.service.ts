@@ -93,6 +93,11 @@ export class CustomSMSSenderService {
       console.log(
         `[${triggerSource}] SMS enviado exitosamente por Twilio a: ${phoneNumber} para usuario: ${userName}`
       );
+      
+      // DEBUGGING: Log timestamp para verificar expiración
+      const now = new Date();
+      console.log(`[${triggerSource}] Timestamp de envío SMS: ${now.toISOString()}`);
+      console.log(`[${triggerSource}] Timezone offset: ${now.getTimezoneOffset()} minutos`);
     } catch (error) {
       console.error(
         `Error en Custom SMS Sender para usuario ${userName}:`,
