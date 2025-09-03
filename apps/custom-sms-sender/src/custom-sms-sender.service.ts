@@ -88,7 +88,7 @@ export class CustomSMSSenderService {
       }
 
       // Enviar SMS por Twilio
-      await this.twilioService.sendSMS(phoneNumber, message);
+      // await this.twilioService.sendSMS(phoneNumber, message);
 
       console.log(
         `[${triggerSource}] SMS enviado exitosamente por Twilio a: ${phoneNumber} para usuario: ${userName}`
@@ -98,6 +98,7 @@ export class CustomSMSSenderService {
       const now = new Date();
       console.log(`[${triggerSource}] Timestamp de envío SMS: ${now.toISOString()}`);
       console.log(`[${triggerSource}] Timezone offset: ${now.getTimezoneOffset()} minutos`);
+      console.log(`[${triggerSource}] Código enviado: ${decryptedCode} (para debugging - REMOVER en producción)`);
     } catch (error) {
       console.error(
         `Error en Custom SMS Sender para usuario ${userName}:`,
