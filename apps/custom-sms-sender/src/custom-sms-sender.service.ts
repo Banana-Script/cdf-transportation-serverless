@@ -17,6 +17,16 @@ interface CustomSMSSenderEvent {
     type: string;
     message: string;
     code: string; // Este es el código encriptado
+    clientMetadata: any;
+    userAttributes: {
+      sub: string;
+      phone_number: string;
+      phone_number_verified: string;
+      preferred_username: string;
+      name?: string;
+      profile?: string;
+      'cognito:user_status'?: string;
+    };
   };
 }
 
@@ -26,8 +36,6 @@ export class CustomSMSSenderService {
 
   constructor(private readonly twilioService: TwilioService) {
     console.log("Inicializando Custom SMS Sender Service");
-    console.log("NODE_ENV:", process.env.NODE_ENV);
-    console.log("AWS_PROFILE:", process.env.AWS_PROFILE);
 
     // Initialize AWS Encryption SDK client with proper commitment policy
     this.encryptionClient = buildClient(
@@ -36,7 +44,7 @@ export class CustomSMSSenderService {
   }
 
   async handleEvent(event: CustomSMSSenderEvent): Promise<void> {
-    // console.log('Custom SMS Sender Event:', JSON.stringify(event, null, 2));
+    console.log('Custom SMS Sender Event:', JSON.stringify(event, null, 2));
 
     const { request, triggerSource, userName } = event;
 
@@ -45,15 +53,12 @@ export class CustomSMSSenderService {
       const decryptedCode = await this.decryptCode(request.code, event.userPoolId);
       console.log("Código desencriptado exitosamente");
 
-      // Determinar el número de teléfono del usuario
-      const phoneNumber = await this.getUserPhoneNumber(
-        event.userPoolId,
-        userName
-      );
+      // El número de teléfono viene en el evento
+      const phoneNumber = event.request.userAttributes?.phone_number;
 
       if (!phoneNumber) {
         throw new Error(
-          `No se encontró número de teléfono para el usuario: ${userName}`
+          `No se encontró número de teléfono en el evento para el usuario: ${userName}`
         );
       }
 
@@ -61,7 +66,7 @@ export class CustomSMSSenderService {
       let message = "";
 
       switch (triggerSource) {
-        case "CustomSMSSender_SignUp":
+        // case "CustomSMSSender_SignUp":
         case "CustomSMSSender_ResendCode":
           message = `Tu código de verificación para COORSERPARK APP es: ${decryptedCode}`;
           break;
@@ -88,17 +93,11 @@ export class CustomSMSSenderService {
       }
 
       // Enviar SMS por Twilio
-      // await this.twilioService.sendSMS(phoneNumber, message);
+      await this.twilioService.sendSMS(phoneNumber, message);
 
       console.log(
-        `[${triggerSource}] SMS enviado exitosamente por Twilio a: ${phoneNumber} para usuario: ${userName}`
+        `[${triggerSource}] SMS enviado exitosamente por Twilio para usuario: ${userName}`
       );
-      
-      // DEBUGGING: Log timestamp para verificar expiración
-      const now = new Date();
-      console.log(`[${triggerSource}] Timestamp de envío SMS: ${now.toISOString()}`);
-      console.log(`[${triggerSource}] Timezone offset: ${now.getTimezoneOffset()} minutos`);
-      console.log(`[${triggerSource}] Código enviado: ${decryptedCode} (para debugging - REMOVER en producción)`);
     } catch (error) {
       console.error(
         `Error en Custom SMS Sender para usuario ${userName}:`,
@@ -110,8 +109,6 @@ export class CustomSMSSenderService {
 
   private async decryptCode(encryptedCode: string, userPoolId?: string): Promise<string> {
     try {
-      console.log("Código encriptado recibido:", encryptedCode);
-      console.log("User Pool ID:", userPoolId);
 
       // Validar que el código no esté vacío
       if (!encryptedCode || encryptedCode.trim().length === 0) {
@@ -120,24 +117,19 @@ export class CustomSMSSenderService {
 
       // Decode base64 encrypted code
       const ciphertextBuffer = Buffer.from(encryptedCode, "base64");
-      console.log("Buffer creado, tamaño:", ciphertextBuffer.length);
 
       // Create KMS keyring in discovery mode to let it find the key from ciphertext
       const keyring = new KmsKeyringNode({ 
         discovery: true 
       });
       
-      console.log("🔐 Usando AWS Encryption SDK para desencriptar...");
-      
       // Decrypt using AWS Encryption SDK with proper client instance
       const { decrypt } = this.encryptionClient;
       const { plaintext, messageHeader } = await decrypt(keyring, ciphertextBuffer);
       
-      console.log("✅ Desencriptación exitosa con AWS Encryption SDK");
-      console.log("Encryption context:", messageHeader.encryptionContext);
+      console.log("Desencriptación exitosa con AWS Encryption SDK");
       
       const decryptedCode = plaintext.toString('utf-8');
-      console.log("Código desencriptado, longitud:", decryptedCode.length);
       
       // Unescape HTML characters as per documentation
       const unescapedCode = decryptedCode
@@ -147,7 +139,6 @@ export class CustomSMSSenderService {
         .replace(/&quot;/g, '"')
         .replace(/&#x27;/g, "'");
       
-      console.log("Código final después de unescape:", unescapedCode);
       return unescapedCode;
     } catch (error) {
       console.error("Error desencriptando código:", error);
@@ -187,32 +178,4 @@ export class CustomSMSSenderService {
     }
   }
 
-  private async getUserPhoneNumber(
-    userPoolId: string,
-    userName: string
-  ): Promise<string | null> {
-    try {
-      // Importar CognitoIdentityServiceProvider aquí para evitar problemas de importación
-      const { CognitoIdentityServiceProvider } = await import("aws-sdk");
-      const cognito = new CognitoIdentityServiceProvider({
-        region: process.env.REGION || "us-east-1",
-      });
-
-      const params = {
-        UserPoolId: userPoolId,
-        Username: userName,
-      };
-
-      const result = await cognito.adminGetUser(params).promise();
-
-      const phoneNumberAttr = result.UserAttributes?.find(
-        (attr) => attr.Name === "phone_number"
-      );
-
-      return phoneNumberAttr?.Value || null;
-    } catch (error) {
-      console.error("Error obteniendo número de teléfono del usuario:", error);
-      throw error;
-    }
-  }
 }

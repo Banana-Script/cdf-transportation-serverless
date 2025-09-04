@@ -26,20 +26,10 @@ export class CognitoMessagesService {
         const codePlaceholder = "{####}";
         const usernamePlaceholder = "{username}";
 
-        // Verificar si el usuario tiene teléfono para enviar SMS
+        // Solo verificar email para forgot password
         const hasEmailForgot =
           userAttributes.email && userAttributes.email_verified !== "false";
-        const hasPhoneForgot =
-          userAttributes.phone_number &&
-          userAttributes.phone_number_verified !== "false";
 
-        // Log si tiene teléfono (SMS deshabilitado - solo logging)
-        if (hasPhoneForgot && userAttributes.phone_number) {
-          console.log(
-            `[ForgotPassword] SMS DESHABILITADO - Usuario con teléfono: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
-          );
-        } 
-        
         if (hasEmailForgot) {
           console.log(
             `[ForgotPassword] Enviando email de recuperación a: ${userAttributes.email} para usuario: ${userAttributes.email}`
@@ -124,29 +114,18 @@ export class CognitoMessagesService {
           event.response.emailSubject = emailSubject;
           event.response.emailMessage = emailMessage;
         } else {
-          // Si no tiene ni email ni teléfono válido
+          // Si no tiene email válido
           console.warn(
-            `[ForgotPassword] Usuario sin email ni teléfono válido para recuperación de contraseña. Username: ${userAttributes.username || "N/A"}, Email: ${userAttributes.email || "N/A"}, Phone: ${userAttributes.phone_number || "N/A"}`
+            `[ForgotPassword] Usuario sin email válido para recuperación de contraseña. Username: ${userAttributes.username || "N/A"}, Email: ${userAttributes.email || "N/A"}`
           );
         }
         break;
 
       case "CustomMessage_AdminCreateUser":
-        // Verificar si el usuario fue creado con email o teléfono
+        // Solo verificar email para admin create user
         const hasEmail =
           userAttributes.email && userAttributes.email_verified !== "false";
-        const hasPhone =
-          userAttributes.phone_number &&
-          userAttributes.phone_number_verified !== "false";
 
-        // Log si tiene teléfono (SMS deshabilitado - solo logging)
-        if (hasPhone && userAttributes.phone_number) {
-          console.log(
-            `[AdminCreateUser] SMS DESHABILITADO - Usuario con teléfono: ${userAttributes.phone_number} para usuario: ${userAttributes.email || userAttributes.phone_number}`
-          );
-        }
-
-        // Si tiene email, enviar por email (comportamiento por defecto)
         if (hasEmail) {
           console.log(
             `[AdminCreateUser] Enviando email de contraseña temporal a: ${userAttributes.email} para usuario: ${userAttributes.email}`
@@ -225,9 +204,9 @@ export class CognitoMessagesService {
           event.response.emailSubject = emailSubject;
           event.response.emailMessage = emailMessage;
         } else {
-          // Si no tiene ni email ni teléfono válido, usar comportamiento por defecto
+          // Si no tiene email válido, usar comportamiento por defecto
           console.warn(
-            `[AdminCreateUser] Usuario sin email ni teléfono válido para contraseña temporal. Username: ${userAttributes.username || "N/A"}, Email: ${userAttributes.email || "N/A"}, Phone: ${userAttributes.phone_number || "N/A"}`
+            `[AdminCreateUser] Usuario sin email válido para contraseña temporal. Username: ${userAttributes.username || "N/A"}, Email: ${userAttributes.email || "N/A"}`
           );
         }
         break;
@@ -244,18 +223,4 @@ export class CognitoMessagesService {
     return event;
   }
 
-  async sendSMS(phoneNumber: string, message: string, fromNumber?: string) {
-    try {
-      const result = await this.twilioService.sendSMS(
-        phoneNumber,
-        message,
-        fromNumber
-      );
-      console.log("SMS sent successfully:", result);
-      return result;
-    } catch (error) {
-      console.error("Error sending SMS:", error);
-      throw error;
-    }
-  }
 }
